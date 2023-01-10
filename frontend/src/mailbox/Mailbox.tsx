@@ -9,9 +9,9 @@ interface MailLineProps {
 function EmptyLine() {
   return (
     <tr className="border">
-      <td className="flex flex-row items-start pl-4">-</td>
-      <td>-</td>
-      <td>-</td>
+      <td colSpan={3} className="flex flex-row items-start pl-4">
+        No mails in this folder
+      </td>
     </tr>
   );
 }
