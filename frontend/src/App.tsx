@@ -1,20 +1,22 @@
-import React, { useEffect, useState } from "react";
-import { MailDto, MailboxDto } from "./dto/mailbox.model";
-import { io } from "socket.io-client";
-import Mailbox from "./mailbox/Mailbox";
-import MailboxService from "./services/mailbox.service";
+import React, { useEffect, useState } from 'react';
+import { MailDto, MailboxDto } from './dto/mailbox.model';
+import { io } from 'socket.io-client';
+import Mailbox from './components/mailbox/Mailbox';
+import MailboxService, { getWSUrl } from './services/mailbox.service';
 
-const socket = io("ws://localhost:81/");
+const socket = io(getWSUrl());
 
 function App() {
   const [isConnected, setIsConnected] = useState(socket.connected);
   const [mailboxInfo, setMailboxInfo] = React.useState<MailboxDto>({
-    owner: "",
+    _id: '',
+    owner: '',
     folders: [],
   });
   const [selectedMail, setSelectedMail] = React.useState<MailDto>();
+  // eslint-disable-next-line
   const [sessionId, setSessionId] = useState(null);
-  const mailRef = React.useRef("carlos@my-gmail.com");
+  const mailRef = React.useRef('carlos@my-gmail.com');
   const [mailAddress, setMailAddress] = React.useState(mailRef.current);
 
   React.useEffect(() => {
@@ -25,16 +27,16 @@ function App() {
   }, [mailAddress]);
 
   React.useEffect(() => {
-    socket.on("connect", () => {
-      console.log("WS Connected");
+    socket.on('connect', () => {
+      console.log('WS Connected');
       setIsConnected(true);
     });
 
-    socket.on("disconnect", () => {
+    socket.on('disconnect', () => {
       setIsConnected(false);
     });
 
-    socket.on("new_mail", (a) => {
+    socket.on('new_mail', (a) => {
       if (mailboxInfo) {
         let newMailboxInfo = mailboxInfo;
         newMailboxInfo.folders
@@ -44,15 +46,15 @@ function App() {
       }
     });
     return () => {
-      socket.off("connect");
-      socket.off("disconnect");
-      socket.off("new_mail");
+      socket.off('connect');
+      socket.off('disconnect');
+      socket.off('new_mail');
     };
   }, [mailboxInfo]);
 
   useEffect(() => {
     if (isConnected === true) {
-      socket.emit("subscribe", { owner: mailAddress }, (val: any) => {
+      socket.emit('subscribe', { owner: mailAddress }, (val: any) => {
         setSessionId(val);
       });
     } else {
