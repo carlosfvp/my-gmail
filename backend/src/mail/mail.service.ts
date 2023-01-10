@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Mailbox, MailboxDocument } from 'src/mailbox/schemas/mailbox.schema';
 import { CreateMailDto } from './dto/createMailDto';
 import { Mail, MailDocument } from './schemas/mail.schema';
-import { Folder, FolderDocument } from 'src/mailbox/schemas/folder.schema';
 import { EventsGateway } from '../events/events.gateway';
+import { Mailbox, MailboxDocument } from '../mailbox/schemas/mailbox.schema';
 
 @Injectable()
 export class MailService {
@@ -14,6 +13,12 @@ export class MailService {
     private readonly eventsGateway: EventsGateway,
   ) {}
 
+  /**
+   * createMail
+   * @param toMailboxId
+   * @param fromMailboxId
+   * @param createMailDto
+   */
   async createMail(
     toMailboxId: string,
     fromMailboxId: string,
@@ -50,6 +55,13 @@ export class MailService {
     );
   }
 
+  /**
+   * deleteMail
+   * @param mailboxId
+   * @param folder
+   * @param mailId
+   * @returns
+   */
   async deleteMail(
     mailboxId: string,
     folder: string,

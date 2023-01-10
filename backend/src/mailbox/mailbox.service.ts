@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
-import { Mailbox, MailboxDocument } from 'src/mailbox/schemas/mailbox.schema';
 import { CreateMailboxDto } from './dto/createMailboxDto';
-import { Folder, FolderDocument } from './schemas/folder.schema';
-import { EventsGateway } from '../events/events.gateway';
+import { Folder } from './schemas/folder.schema';
+import { Mailbox, MailboxDocument } from './schemas/mailbox.schema';
 
 @Injectable()
 export class MailboxService {
@@ -12,15 +11,32 @@ export class MailboxService {
     @InjectModel(Mailbox.name) private mailboxModel: Model<MailboxDocument>,
   ) {}
 
+  /**
+   * Get mailbox by EmailAddress
+   * @param owner
+   * @returns
+   */
   async getMailboxByOwner(owner: string): Promise<MailboxDocument> {
     return this.mailboxModel.findOne({ owner: owner }).exec();
   }
 
+  /**
+   * Get mailbox by mailboxId
+   * @param mailboxId
+   * @returns
+   */
   async getMailboxByMailboxId(mailboxId: string): Promise<MailboxDocument> {
     return this.mailboxModel.findOne({ _id: mailboxId }).exec();
   }
 
-  async createMailbox(createMailboxDto: CreateMailboxDto): Promise<Mailbox> {
+  /**
+   * Create mailbox with email address in DTO
+   * @param createMailboxDto
+   * @returns
+   */
+  async createMailbox(
+    createMailboxDto: CreateMailboxDto,
+  ): Promise<MailboxDocument> {
     const folder1: Folder = {
       _id: new mongoose.Types.ObjectId().toHexString(),
       path: 'Inbox',
