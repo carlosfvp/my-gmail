@@ -14,17 +14,11 @@ export class MailService {
     private readonly eventsGateway: EventsGateway,
   ) {}
 
-  // async getMailById(mailboxId: string, mailId: string): Promise<Mail> {
-  //   return this.mailboxModel.findOne({ _id: mailboxId, f }, {}).exec();
-  // }
-
   async createMail(
     toMailboxId: string,
     fromMailboxId: string,
     createMailDto: CreateMailDto,
   ): Promise<void> {
-    // console.log(toMailboxId);
-    // console.log(fromMailboxId);
     const toMail = await this.mailboxModel.updateOne(
       { _id: toMailboxId, 'folders.path': 'Inbox' },
       {
