@@ -6,9 +6,9 @@ import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/my-gmail'),
-    MailModule,
+    MongooseModule.forRoot(process.env.MONGO_URL),
     MailboxModule,
+    MailModule,
     EventsModule,
   ],
 })

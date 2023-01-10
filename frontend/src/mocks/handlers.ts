@@ -1,5 +1,10 @@
 import { rest } from "msw";
 
+/**
+ * Mocked responses for mailboxes requests.
+ * Not constant to be able to modify the elements
+ * using the send mail request for testing
+ */
 let mockMailboxResponses = {
   "carlos1@my-gmail.com": {
     _id: "63bc6311ff31a2ebe4b9714f",

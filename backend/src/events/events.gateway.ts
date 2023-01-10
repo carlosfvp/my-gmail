@@ -3,23 +3,22 @@ import {
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
-import { Mail, MailDocument } from '../mail/schemas/mail.schema';
-import { MailboxService } from 'src/mailbox/mailbox.service';
-import { Mailbox, MailboxDocument } from 'src/mailbox/schemas/mailbox.schema';
+import { Mail } from '../mail/schemas/mail.schema';
+import { MailboxService } from '../mailbox/mailbox.service';
+import { MailboxDocument } from '../mailbox/schemas/mailbox.schema';
 
-interface ClientSocket {
+type ClientSocket = {
   socket: Socket;
   owner: string;
   mailboxId: string;
-}
+};
 
-@WebSocketGateway(81, {
+@WebSocketGateway(Number(process.env.WS_PORT), {
   cors: {
     origin: '*',
   },
@@ -32,18 +31,35 @@ export class EventsGateway
   @WebSocketServer()
   server: Server;
 
+  /**
+   * Client list, will be linked to mailbox data
+   */
   clients: ClientSocket[] = [];
+
+  /**
+   * handleConnection
+   * @param socket
+   * @param args
+   */
 
   handleConnection(socket: Socket, ...args: any[]) {
     this.clients.push({ socket: socket, owner: null, mailboxId: null });
   }
 
+  /**
+   * handleDisconnect
+   * @param socket
+   */
   handleDisconnect(socket: Socket) {
-    console.log('disconnection');
     const index = this.getClientIndexBySocket(socket);
     this.clients.splice(index, 1);
   }
 
+  /**
+   * Get client index by the socket id
+   * @param socket
+   * @returns
+   */
   getClientIndexBySocket(socket: Socket): number {
     for (let i = 0; i < this.clients.length; i++) {
       if (this.clients[i].socket.id === socket.id) {
@@ -53,24 +69,11 @@ export class EventsGateway
     return -1;
   }
 
-  getClientBySocket(socket: Socket): ClientSocket {
-    for (let i = 0; i < this.clients.length; i++) {
-      if (this.clients[i].socket.id === socket.id) {
-        return this.clients[i];
-      }
-    }
-    return null;
-  }
-
-  getClientByOwner(owner: string): ClientSocket {
-    for (let i = 0; i < this.clients.length; i++) {
-      if (this.clients[i].owner === owner) {
-        return this.clients[i];
-      }
-    }
-    return null;
-  }
-
+  /**
+   * Get ClientSocket object by the mailboxId(db model ID)
+   * @param mailboxId
+   * @returns
+   */
   getClientByMailboxId(mailboxId: string): ClientSocket {
     for (let i = 0; i < this.clients.length; i++) {
       if (this.clients[i].mailboxId === mailboxId) {
@@ -80,6 +83,12 @@ export class EventsGateway
     return null;
   }
 
+  /**
+   * Listen for frontend connection, sends back the client index
+   * @param socket
+   * @param owner
+   * @returns
+   */
   @SubscribeMessage('subscribe')
   async handleEvent(
     @ConnectedSocket() socket: Socket,
@@ -99,6 +108,13 @@ export class EventsGateway
     return clientIndex;
   }
 
+  /**
+   * Emit event to sender and recevied to notify for a new email object
+   * @param mailboxId
+   * @param path
+   * @param mail
+   * @returns
+   */
   async emitNewEmail(mailboxId: string, path: string, mail: Mail) {
     const toClient = this.getClientByMailboxId(mailboxId);
     if (toClient == null) return;
