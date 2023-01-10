@@ -1,19 +1,9 @@
-import React from "react";
-import { MailDto, MailboxDto } from "../dto/mailbox.model";
+import React from 'react';
+import { MailDto, MailboxDto } from '../../dto/mailbox.model';
 
 interface MailLineProps {
   info: MailDto;
   pickMail: React.Dispatch<React.SetStateAction<MailDto | undefined>>;
-}
-
-function EmptyLine() {
-  return (
-    <tr className="border">
-      <td colSpan={3} className="flex flex-row items-start pl-4">
-        No mails in this folder
-      </td>
-    </tr>
-  );
 }
 
 function MailLine(props: MailLineProps) {
@@ -26,17 +16,37 @@ function MailLine(props: MailLineProps) {
   );
 }
 
+function EmptyLine() {
+  return (
+    <tr className="border">
+      <td colSpan={3} className="flex flex-row items-start pl-4">
+        No mails in this folder
+      </td>
+    </tr>
+  );
+}
+
+/**
+ * @param owner current address of the mailbox
+ * @param mailboxInfo DTO result from API request
+ * @param pickMail dispatch to update the current selected mail to parent component
+ */
 export type MailboxProps = {
   owner: string;
   mailboxInfo?: MailboxDto;
   pickMail: React.Dispatch<React.SetStateAction<MailDto | undefined>>;
 };
 
+/**
+ * Mailbox component, includes folder list with email list
+ * @param props
+ * @returns
+ */
 export default function Mailbox(props: MailboxProps) {
-  const [currentFolder, setCurrentFolder] = React.useState("Inbox");
+  const [currentFolder, setCurrentFolder] = React.useState('Inbox');
 
   const folder = props.mailboxInfo?.folders?.find(
-    (f) => f.path === currentFolder
+    (f) => f.path === currentFolder,
   );
   const mailList = folder?.mails?.map((info, index) => (
     <MailLine key={index} info={info} pickMail={props.pickMail} />
