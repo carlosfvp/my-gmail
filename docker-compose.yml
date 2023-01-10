@@ -1,0 +1,55 @@
+version: "3"
+
+services:
+  my-mongodb:
+    image: mongo:4.2.3-bionic
+    container_name: my-mongodb
+    ports:
+      - 27018:27017
+    environment:
+      - MONGO_INITDB_DATABASE=my-gmail
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    volumes:
+      - mongodb:/data/db
+      - mongoconfig:/data/configdb
+    networks:
+      - mongo_net
+
+  my-gmail-backend:
+    build: ./backend
+    image: carlosfvp/my-gmail-backend:1
+    container_name: my-gmail-backend
+    environment:
+      - MONGO_URL=mongodb://admin:admin@my-mongodb/?authMechanism=DEFAULT
+      - NODE_ENV=development
+      - APP_PORT=3001
+      - WS_PORT=3002
+    ports:
+      - 3001:3001
+      - 3002:3002
+    networks:
+      - mongo_net
+    depends_on:
+      - my-mongodb
+
+  my-gmail-frontend:
+    build: ./frontend
+    image: carlosfvp/my-gmail-frontend:1
+    container_name: my-gmail-frontend
+    environment:
+      - NODE_ENV=development
+    ports:
+      - 81:80
+    networks:
+      - mongo_net
+    depends_on:
+      - my-gmail-backend
+
+volumes:
+  mongodb:
+  mongoconfig:
+
+networks:
+  mongo_net:
+    driver: bridge
